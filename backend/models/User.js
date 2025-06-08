@@ -25,7 +25,8 @@ const userSchema = new mongoose.Schema({
     }],
     favRecipes:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Recipe'
+        ref:'Recipe',
+          index: true 
     }],
     createdAt:{
         type:Date

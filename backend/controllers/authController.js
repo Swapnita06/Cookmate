@@ -106,6 +106,7 @@ exports.getUserProfile = async (req, res) => {
             // .populate('savedRecipes createdRecipes favRecipes');
              .populate({
         path: 'savedRecipes createdRecipes favRecipes',
+          select: 'title description image ingredients',
         options: { strictPopulate: false } // Temporarily allow missing models
       });
 

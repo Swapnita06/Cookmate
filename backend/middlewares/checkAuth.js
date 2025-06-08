@@ -16,7 +16,7 @@ module.exports = (req, res, next) => {
     if (!decoded.userId) {
       return res.status(401).json({ message: 'Authentication failed - invalid token structure' });
     }
-
+req.userId = decoded.userId; 
      req.user = { 
       _id: decoded.userId,
       email: decoded.email,

@@ -32,4 +32,8 @@ router.delete('/delete/:id',
   recipeController.deleteRecipe
 );
 
+router.post('/:id/like', checkAuth, recipeController.likeRecipe);
+router.post('/:id/comments', checkAuth, recipeController.addComment);
+router.post('/:id/save',checkAuth, recipeController.saveRecipe);
+
 module.exports = router;
