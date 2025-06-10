@@ -115,7 +115,7 @@ export const likeRecipe = async (recipeId: string, token: string): Promise<void>
   }
 };
 
-export const saveRecipe = async (recipeId: string, token: string): Promise<void> => {
+export const saveRecipe = async (recipeId: string, token: string): Promise<{ message: string }> => {
   const response = await fetch(`${API_BASE_URL}/${recipeId}/save`, {
     method: 'POST',
     headers: {
@@ -128,6 +128,7 @@ export const saveRecipe = async (recipeId: string, token: string): Promise<void>
     const errorData = await response.json() as { message?: string };
     throw new Error(errorData.message || 'Failed to save recipe');
   }
+   return await response.json();
 };
 
 export const addComment = async (recipeId: string, text: string, token: string): Promise<Comment> => {

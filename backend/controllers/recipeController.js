@@ -292,12 +292,16 @@ const saveRecipe = async (req, res) => {
     if (alreadySaved) {
       // Remove from saved recipes
       user.savedRecipes.pull(recipe._id);
+      recipe.savedBy.pull(user._id);
       await user.save();
+      await recipe.save();
       return res.status(200).json({ message: 'Recipe removed from saved recipes' });
     } else {
       // Add to saved recipes
       user.savedRecipes.push(recipe._id);
+      recipe.savedBy.push(user._id);
       await user.save();
+         await recipe.save();
       return res.status(200).json({ message: 'Recipe saved successfully' });
     }
   } catch (error) {

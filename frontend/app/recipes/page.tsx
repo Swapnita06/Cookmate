@@ -6,6 +6,7 @@ import { getAllRecipes, likeRecipe, saveRecipe, addComment } from '../services/r
 import { Recipe } from '../component/types/recipe';
 import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
+import VoiceAssistant from '../component/VoiceAssistant';
 
 const RecipeListPage = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -14,6 +15,7 @@ const RecipeListPage = () => {
   const [commentTexts, setCommentTexts] = useState<Record<string, string>>({});
   const { user, isAuthenticated, logout } = useAuth();
   const router = useRouter();
+  const [activeRecipeId, setActiveRecipeId] = useState<string | null>(null);
 
   // Get token from localStorage
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -67,9 +69,13 @@ const RecipeListPage = () => {
       return;
     }
     try {
-      await saveRecipe(recipeId, token);
-      alert('Recipe saved to your collection!');
-    } catch (err) {
+      const response = await saveRecipe(recipeId, token);
+      if (response?.message) {
+      alert(response.message);
+    } else {
+      alert('Recipe action completed.'); // fallback message
+    }
+  } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save recipe');
       if (err instanceof Error && err.message.includes('Unauthorized')) {
         logout();
@@ -82,42 +88,41 @@ const RecipeListPage = () => {
     setCommentTexts(prev => ({ ...prev, [recipeId]: text }));
   };
 
- const handleCommentSubmit = async (recipeId: string) => {
-  if (!isAuthenticated || !user || !token) {
-    router.push('/login');
-    return;
-  }
-  const text = commentTexts[recipeId] || '';
-  if (!text.trim()) return;
-
-  try {
-    const newComment = await addComment(recipeId, text, token);
-    setRecipes(recipes.map(recipe => {
-      if (recipe._id === recipeId) {
-        return {
-          ...recipe,
-          comments: [...recipe.comments, {
-            ...newComment,
-            user: {
-              _id: user._id,
-              name: user.name,
-              email: user.email
-            }
-          }]
-           //comments: [...recipe.comments, newComment]
-        };
-      }
-      return recipe;
-    }));
-    setCommentTexts(prev => ({ ...prev, [recipeId]: '' }));
-  } catch (err) {
-    setError(err instanceof Error ? err.message : 'Failed to add comment');
-    if (err instanceof Error && err.message.includes('Unauthorized')) {
-      logout();
+  const handleCommentSubmit = async (recipeId: string) => {
+    if (!isAuthenticated || !user || !token) {
       router.push('/login');
+      return;
     }
-  }
-};
+    const text = commentTexts[recipeId] || '';
+    if (!text.trim()) return;
+
+    try {
+      const newComment = await addComment(recipeId, text, token);
+      setRecipes(recipes.map(recipe => {
+        if (recipe._id === recipeId) {
+          return {
+            ...recipe,
+            comments: [...recipe.comments, {
+              ...newComment,
+              user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email
+              }
+            }]
+          };
+        }
+        return recipe;
+      }));
+      setCommentTexts(prev => ({ ...prev, [recipeId]: '' }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add comment');
+      if (err instanceof Error && err.message.includes('Unauthorized')) {
+        logout();
+        router.push('/login');
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -141,7 +146,18 @@ const RecipeListPage = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {recipes.map(recipe => (
-          <div key={recipe._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+          <div key={recipe._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow relative">
+            {/* Voice Assistant Button */}
+            <button 
+              onClick={() => setActiveRecipeId(recipe._id)}
+              className="absolute top-16 right-2 bg-blue-100 text-blue-800 p-2 rounded-full hover:bg-blue-200 z-10"
+              aria-label="Voice Assistant"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 " fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+              </svg>
+            </button>
+            
             {recipe.image && (
               <img 
                 src={recipe.image} 
@@ -202,38 +218,19 @@ const RecipeListPage = () => {
               <div className="border-t pt-3">
                 <h4 className="font-medium mb-2">Comments ({recipe.comments.length})</h4>
                 
-               <div className="space-y-2 mb-3 max-h-32 overflow-y-auto">
-  {recipe.comments.map((comment) => (
-    <div 
-      key={`comment-${comment._id}`}
-      className="text-sm"
-    >
-      <span className="font-semibold">
-        {comment.user?.name || 'Anonymous'}: 
-      </span>
-      <span> {comment.text}</span>
-    </div>
-  ))}
-</div>
-
-{/* <div className="space-y-2 mb-3 max-h-32 overflow-y-auto">
-  {recipe.comments.map((comment) => {
-    // Skip rendering if comment is just an ID string
-    if (typeof comment === 'string') return null;
-    
-    return (
-      <div 
-        key={`comment-${comment._id}`}
-        className="text-sm"
-      >
-        <span className="font-semibold">
-          {comment.user?.name || 'Anonymous'}: 
-        </span>
-        <span> {comment.text}</span>
-      </div>
-    );
-  })}
-</div> */}
+                <div className="space-y-2 mb-3 max-h-32 overflow-y-auto">
+                  {recipe.comments.map((comment) => (
+                    <div 
+                      key={`comment-${comment._id}`}
+                      className="text-sm"
+                    >
+                      <span className="font-semibold">
+                        {comment.user?.name || 'Anonymous'}: 
+                      </span>
+                      <span> {comment.text}</span>
+                    </div>
+                  ))}
+                </div>
                 
                 <div className="flex">
                   <input
@@ -252,6 +249,11 @@ const RecipeListPage = () => {
                 </div>
               </div>
             </div>
+            
+            {/* Voice Assistant Component */}
+            {activeRecipeId === recipe._id && (
+              <VoiceAssistant recipe={recipe} />
+            )}
           </div>
         ))}
       </div>
