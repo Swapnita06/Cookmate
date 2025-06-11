@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { registerUser, loginUser } from '../services/api';
+import { registerUser, loginUser, resendVerification } from '../services/api';
 import toast from 'react-hot-toast';
 
 // Form schemas
@@ -25,6 +25,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [showVerificationNotice, setShowVerificationNotice] = useState(false)
+  const [unverifiedUserId, setUnverifiedUserId] = useState<string | null>(null)
   const router = useRouter();
 
   // Toggle between login/register
@@ -53,28 +55,55 @@ export default function AuthPage() {
   });
 
   // Handle Login
-  const onLogin = async (data: LoginFormData) => {
+   const onLogin = async (data: LoginFormData) => {
     try {
-      const response = await loginUser(data);
-      localStorage.setItem('token', response.data.token);
-      toast.success('Logged in successfully!');
-      router.push('/homepage');
-    } catch (error) {
-      toast.error('Invalid credentials');
+      const response = await loginUser(data)
+      
+      // Check if account is not verified
+      if (response.data.message === "Account not verified") {
+        setUnverifiedUserId(response.data.userId)
+        setShowVerificationNotice(true)
+        return
+      }
+
+      localStorage.setItem("token", response.data.token)
+      toast.success("Logged in successfully!")
+      router.push("/homepage")
+    } catch (error: any) {
+      if (error.response?.data?.message === "Account not verified") {
+        setUnverifiedUserId(error.response.data.userId)
+        setShowVerificationNotice(true)
+      } else {
+        toast.error(error.response?.data?.message || "Invalid credentials")
+      }
     }
-  };
+  }
 
   // Handle Register
   const onRegister = async (data: RegisterFormData) => {
     try {
       await registerUser(data);
-      toast.success('Account created successfully!');
+     toast.success("Registration successful! Please check your email to verify your account.")
       setIsLogin(true); // Switch to login after registration
       reset();
-    } catch (error) {
-      toast.error('Registration failed. Email may already exist.');
+    } catch (error:any) {
+      toast.error(error.response?.data?.message || "Registration failed. Please try again.")
     }
   };
+
+ // Handle resend verification
+  const handleResendVerification = async () => {
+    if (!unverifiedUserId) return
+    
+    try {
+      await resendVerification({ userId: unverifiedUserId })
+      toast.success("Verification email resent successfully!")
+      setShowVerificationNotice(false)
+    } catch (error) {
+      toast.error("Failed to resend verification email")
+    }
+  }
+
 
   return (
     
@@ -87,6 +116,31 @@ export default function AuthPage() {
 
       <div className="w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden">
         {/* Auth Header */}
+   {showVerificationNotice && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
+            <div className="bg-white p-6 rounded-lg max-w-sm">
+              <h3 className="text-lg font-bold mb-4">Verify Your Email</h3>
+              <p className="mb-4">Your account is not yet verified. Please check your email for the verification link.</p>
+              <p className="mb-4">Didn't receive the email?</p>
+              <div className="flex justify-between">
+                <button 
+                  onClick={() => setShowVerificationNotice(false)}
+                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                >
+                  Close
+                </button>
+                <button 
+                  onClick={handleResendVerification}
+                  className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700"
+                >
+                  Resend Email
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
         <div className="bg-orange-500 px-6 py-4">
           <h1 className="text-2xl font-bold text-white text-center">
             {isLogin ? 'Welcome Back' : 'Create Account'}

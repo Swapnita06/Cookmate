@@ -27,4 +27,8 @@ router.put('/profile', [
     check('email').optional().isEmail().normalizeEmail().withMessage('Must be a valid email')
 ], authController.updateUserProfile);
 
+// New verification routes
+router.get('/verify-email', authController.verifyEmail);
+router.post('/resend-verification', authController.resendVerification);
+
 module.exports = router;

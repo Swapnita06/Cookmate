@@ -5,7 +5,10 @@ const userSchema = new mongoose.Schema({
     _id:mongoose.Schema.Types.ObjectId,
     email:{
         type:String,
-        required:true
+        required:true,
+          unique: true,
+    trim: true,
+    lowercase: true
     },
     password:{
         type:String,
@@ -15,6 +18,16 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    isVerified: {
+    type: Boolean,
+    default: false
+  },
+  verificationToken: String,
+  verificationTokenExpires: Date,
+  savedRecipes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Recipe'
+  }],
     savedRecipes:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Recipe'

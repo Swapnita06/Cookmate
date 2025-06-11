@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 const generateToken = (userId) => {
     return jwt.sign(
@@ -11,6 +13,19 @@ const generateToken = (userId) => {
         { expiresIn: '30d' }
     );
 };
+
+// Create email transporter
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // or your email service
+    secure: true,
+    auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD
+    },
+    tls: {
+    rejectUnauthorized: false
+  }
+});
 
 exports.register = async (req, res) => {
     // Validate input
@@ -31,12 +46,19 @@ exports.register = async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+// Generate verification token
+        const verificationToken = crypto.randomBytes(20).toString('hex');
+        const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
         // Create user
         const user = new User({
             _id: new mongoose.Types.ObjectId(),
             email,
             password: hashedPassword,
             name,
+             isVerified: false,
+            verificationToken,
+            verificationTokenExpires,
             savedRecipes: [],
             createdRecipes: [],
             favRecipes: []
@@ -45,13 +67,30 @@ exports.register = async (req, res) => {
         await user.save();
 
         // Generate token
-        const token = generateToken(user._id);
+        //const token = generateToken(user._id);
 
-        // Return response
+            // Send verification email
+        // const verificationUrl = `${process.env.BASE_URL}/verify-email?token=${verificationToken}`;
+        const verificationUrl = `${process.env.BASE_URL}/api/users/verify-email?token=${verificationToken}`;
+       //const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+        const mailOptions = {
+            from: `"CookMate" <${process.env.EMAIL_USERNAME}>`,
+            to: email,
+            subject: 'Verify Your Email for CookMate',
+            html: `
+                <h2>Welcome to CookMate!</h2>
+                <p>Please click the link below to verify your email address:</p>
+                <a href="${verificationUrl}">Verify Email</a>
+                <p>This link will expire in 24 hours.</p>
+                <p>If you didn't create an account with CookMate, please ignore this email.</p>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+
         res.status(201).json({
-            message: "User registered successfully",
+            message: "Registration successful! Please check your email to verify your account.",
             userId: user._id,
-            token,
             email: user.email,
             name: user.name
         });
@@ -59,6 +98,47 @@ exports.register = async (req, res) => {
     } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ message: "Registration failed. Please try again." });
+    }
+};
+
+// Add email verification endpoint
+exports.verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.query;
+
+        const user = await User.findOne({
+            verificationToken: token,
+            verificationTokenExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+           // return res.status(400).json({ message: "Invalid or expired verification token" });
+ return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false&message=Invalid+or+expired+verification+token`);
+        }
+
+    // if (!user) {
+    //         // Return JSON response for API calls
+    //         if (req.accepts('json')) {
+    //             return res.status(400).json({ 
+    //                 success: false,
+    //                 message: "Invalid or expired verification token" 
+    //             });
+    //         }
+    //         // Redirect for direct link clicks
+    //         return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false&message=Invalid+token`);
+    //     }
+
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        user.verificationTokenExpires = undefined;
+        await user.save();
+
+        res.status(200).json({ message: "Email verified successfully! You can now log in." });
+   //return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=true&message=Email+verified+successfully`);
+    } catch (error) {
+        console.error('Email verification error:', error);
+       res.status(500).json({ message: "Email verification failed" });
+   //return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false&message=Verification+failed`);
     }
 };
 
@@ -82,6 +162,13 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
+if (!user.isVerified) {
+            return res.status(403).json({ 
+                message: "Account not verified. Please check your email for verification link.",
+                userId: user._id
+            });
+        }
+
         const token = generateToken(user._id);
 
         res.status(200).json({
@@ -96,6 +183,53 @@ exports.login = async (req, res) => {
         res.status(500).json({ message: "Login failed. Please try again." });
     }
 };
+
+
+// Add resend verification email endpoint
+exports.resendVerification = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({ message: "Email already verified" });
+        }
+
+        // Generate new verification token
+        const verificationToken = crypto.randomBytes(20).toString('hex');
+        user.verificationToken = verificationToken;
+        user.verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+        await user.save();
+
+        // Send verification email
+        const verificationUrl = `${process.env.BASE_URL}/verify-email?token=${verificationToken}`;
+        
+        const mailOptions = {
+            from: `"CookMate" <${process.env.EMAIL_USERNAME}>`,
+            to: user.email,
+            subject: 'Verify Your Email for CookMate',
+            html: `
+                <h2>Welcome to CookMate!</h2>
+                <p>Please click the link below to verify your email address:</p>
+                <a href="${verificationUrl}">Verify Email</a>
+                <p>This link will expire in 24 hours.</p>
+                <p>If you didn't create an account with CookMate, please ignore this email.</p>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: "Verification email resent successfully!" });
+    } catch (error) {
+        console.error('Resend verification error:', error);
+        res.status(500).json({ message: "Failed to resend verification email" });
+    }
+};
+
 
 // Get User Profile
 exports.getUserProfile = async (req, res) => {

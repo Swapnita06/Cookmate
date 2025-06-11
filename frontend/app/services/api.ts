@@ -45,4 +45,13 @@ export const updateUserProfile = async (data: {
   return api.put('/users/profile', data);
 };
 
+// Add new verification endpoints
+export const verifyEmail = async (data: { token: string }) => {
+  return api.get(`/users/verify-email?token=${data.token}`);
+};
+
+export const resendVerification = async (data: { userId: string }) => {
+  return api.post('/users/resend-verification', data);
+};
+
 export default api;
