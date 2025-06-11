@@ -58,7 +58,7 @@ export default function AuthPage() {
       const response = await loginUser(data);
       localStorage.setItem('token', response.data.token);
       toast.success('Logged in successfully!');
-      router.push('/');
+      router.push('/homepage');
     } catch (error) {
       toast.error('Invalid credentials');
     }
