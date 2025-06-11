@@ -71,7 +71,8 @@ exports.register = async (req, res) => {
 
             // Send verification email
         // const verificationUrl = `${process.env.BASE_URL}/verify-email?token=${verificationToken}`;
-        const verificationUrl = `${process.env.BASE_URL}/api/users/verify-email?token=${verificationToken}`;
+      // const verificationUrl = `${process.env.FRONTEND_URL}/api/users/verify-email?token=${verificationToken}`;
+      const verificationUrl = `${process.env.BASE_URL}/api/users/verify-email?token=${verificationToken}`;
        //const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
         const mailOptions = {
             from: `"CookMate" <${process.env.EMAIL_USERNAME}>`,
@@ -111,9 +112,8 @@ exports.verifyEmail = async (req, res) => {
             verificationTokenExpires: { $gt: Date.now() }
         });
 
-        if (!user) {
-           // return res.status(400).json({ message: "Invalid or expired verification token" });
- return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false&message=Invalid+or+expired+verification+token`);
+      if (!user) {
+            return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false&message=Invalid+token`);
         }
 
     // if (!user) {
@@ -132,13 +132,12 @@ exports.verifyEmail = async (req, res) => {
         user.verificationToken = undefined;
         user.verificationTokenExpires = undefined;
         await user.save();
-
-        res.status(200).json({ message: "Email verified successfully! You can now log in." });
-   //return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=true&message=Email+verified+successfully`);
+  return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=true`);
+        //res.status(200).json({ message: "Email verified successfully! You can now log in." });
     } catch (error) {
         console.error('Email verification error:', error);
-       res.status(500).json({ message: "Email verification failed" });
-   //return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false&message=Verification+failed`);
+       //res.status(500).json({ message: "Email verification failed" });
+   return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false`);
     }
 };
 

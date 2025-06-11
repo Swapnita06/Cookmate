@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AuthResponse, User } from '../component/types/auth';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api'
+  baseURL: 'http://localhost:5000/api'
 });
 
 // Add auth token to requests
@@ -46,8 +46,12 @@ export const updateUserProfile = async (data: {
 };
 
 // Add new verification endpoints
+// export const verifyEmail = async (data: { token: string }) => {
+//   return api.get(`/users/verify-email?token=${data.token}`);
+// };
+
 export const verifyEmail = async (data: { token: string }) => {
-  return api.get(`/users/verify-email?token=${data.token}`);
+  return axios.get(`http://localhost:5000/api/users/verify-email?token=${data.token}`);
 };
 
 export const resendVerification = async (data: { userId: string }) => {
