@@ -4,46 +4,6 @@ const User = require('../models/User');
 const Comment = require('../models/Comment.js');
 
 
-// const createRecipe = async (req, res) => {
-//   const session = await mongoose.startSession();
-//   session.startTransaction();
-  
-//   try {
-//     console.log('Authenticated user:', req.user); // Debug log
-    
-//     if (!req.user?._id) {
-//       return res.status(401).json({ message: 'User not authenticated' });
-//     }
-
-//     // 1. Create the recipe
-//     const recipe = new Recipe({
-//       ...req.body,
-//       _id: new mongoose.Types.ObjectId(),
-//       createdBy: req.user._id
-//     });
-
-//     const savedRecipe = await recipe.save({ session });
-
-//     // 2. Update the user's createdRecipes array
-//     await User.findByIdAndUpdate(
-//       req.user._id,
-//       { $push: { createdRecipes: savedRecipe._id } },
-//       { session, new: true }
-//     );
-
-//     await session.commitTransaction();
-//     res.status(201).json(savedRecipe);
-//   } catch (error) {
-//     await session.abortTransaction();
-//     console.error('Recipe creation error:', error);
-//     res.status(500).json({ 
-//       message: "Error creating recipe",
-//       error: error.message 
-//     });
-//   } finally {
-//     session.endSession();
-//   }
-// };
 
 
 
@@ -88,16 +48,7 @@ const createRecipe = async (req, res) => {
   }
 };
 
-// Get all recipes
-// const getAllRecipes = async (req, res) => {
-//   try {
-//     const recipes = await Recipe.find()
-//     .populate('createdBy', 'name email') 
-//     res.status(200).json(recipes);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Error fetching recipes', error });
-//   }
-// };
+
 
 const getAllRecipes = async (req, res) => {
   try {
@@ -120,36 +71,45 @@ const getAllRecipes = async (req, res) => {
 // Get single recipe
 
 
-// const getAllRecipes = async (req, res) => {
+
+
+// const getRecipe = async (req, res) => {
 //   try {
-//     const recipes = await Recipe.find()
-//       .populate('createdBy', 'name email')
-//       .populate({
-//         path: 'comments',
-//         populate: {
-//           path: 'user',
-//           select: 'name email'
-//         }
-//       })
-//       .lean(); // Convert to plain JavaScript objects
-    
-//     res.status(200).json(recipes);
+//     const recipe = await Recipe.findById(req.params.id)
+//     .populate('createdBy', 'name email image')
+//     if (!recipe) {
+//       return res.status(404).json({ message: 'Recipe not found' });
+//     }
+//     res.status(200).json(recipe);
 //   } catch (error) {
-//     res.status(500).json({ message: 'Error fetching recipes', error });
+//     res.status(500).json({ message: 'Error fetching recipe', error:error.message });
 //   }
 // };
 
+
 const getRecipe = async (req, res) => {
   try {
-    const recipe = await Recipe.findById(req.params.id).populate('createdBy', 'name email');
+    const recipe = await Recipe.findById(req.params.id)
+      .populate('createdBy', 'name email image')
+.populate({
+        path: 'comments',
+        populate: {
+          path: 'user',
+          select: 'name email'
+        }
+      })
+      .populate('likes', 'name email')
+      
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found' });
     }
     res.status(200).json(recipe);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching recipe', error });
+    res.status(500).json({ message: 'Error fetching recipe', error: error.message });
   }
 };
+
+
 
 // Update recipe
 const updateRecipe = async (req, res) => {

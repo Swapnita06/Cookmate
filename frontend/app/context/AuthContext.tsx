@@ -20,10 +20,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+ const [token, setToken] = useState<string | null>(null);
+  
+ useEffect(() => {
+    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    setToken(storedToken);
+  }, []);
 
   // Check if token exists in localStorage
-  const isAuthenticated = typeof window !== 'undefined' && Boolean(localStorage.getItem('token'));
-
+  //const isAuthenticated = typeof window !== 'undefined' && Boolean(localStorage.getItem('token'));
+const isAuthenticated = Boolean(token);
   const fetchUser = async () => {
     try {
       // Only fetch user if token exists
@@ -40,9 +46,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   fetchUser();
+  // }, [isAuthenticated]); // Re-run when authentication status changes
+
+ useEffect(() => {
     fetchUser();
-  }, [isAuthenticated]); // Re-run when authentication status changes
+  }, [token]);
+
 
   const login = (token: string) => {
     localStorage.setItem('token', token);

@@ -15,6 +15,16 @@ export interface Recipe {
   createdBy: string;
   createdAt?: string;
   updatedAt?: string;
+  likes: User[] // Changed from string to User[]
+  comments: Comment[]
+  savedBy?: string[]
+}
+
+export interface Comment {
+  _id: string
+  user: User
+  text: string
+  createdAt: string
 }
 
 export interface User {

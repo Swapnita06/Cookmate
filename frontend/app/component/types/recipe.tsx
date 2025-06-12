@@ -3,11 +3,13 @@ export interface User {
   _id: string;
   name: string;
   email: string;
+    image?: string;
 }
 
 export interface Comment {
   _id: string;
   user: User;
+   name: string;
   text: string;
   createdAt: string;
 }
@@ -27,8 +29,10 @@ export interface Recipe {
   steps: RecipeStep[];
   image?: string;
   createdAt: string;
+   createdBy: User ; 
   updatedAt: string;
-  createdBy: User;
-  likes: string[];
+  //likes string[];
+  likes: User[]; 
   comments: Comment[];
+  savedBy?: string[];
 }

@@ -37,9 +37,9 @@ export default function VerifyEmailPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 relative"
+      className="min-h-screen flex items-center justify-center p-4 relative "
       style={{
-        backgroundImage: 'url("/images/food-background.png")',
+        backgroundImage: 'url("/images/auth-bg.png")',
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

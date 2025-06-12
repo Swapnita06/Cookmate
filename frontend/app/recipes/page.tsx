@@ -7,6 +7,7 @@ import { Recipe } from '../component/types/recipe';
 import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
 import VoiceAssistant from '../component/VoiceAssistant';
+import Navbar from '../component/Navbar';
 
 const RecipeListPage = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -141,6 +142,8 @@ const RecipeListPage = () => {
   }
 
   return (
+    <>
+    <Navbar/>
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">All Recipes</h1>
       
@@ -168,9 +171,18 @@ const RecipeListPage = () => {
             
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
-                <Link href={`/recipes/${recipe._id}`} className="text-xl font-semibold hover:text-blue-600">
-                  {recipe.title}
-                </Link>
+                <Link 
+  href={`/recipes/${recipe._id}`}
+  className="text-xl font-semibold hover:text-blue-600"
+  onClick={(e) => {
+    // Prevent navigation if clicking on like/save buttons
+    if ((e.target as HTMLElement).closest('button')) {
+      e.preventDefault();
+    }
+  }}
+>
+  {recipe.title}
+</Link>
                 <div className="flex space-x-2">
                   <button 
                     onClick={() => handleLike(recipe._id)}
@@ -206,7 +218,7 @@ const RecipeListPage = () => {
               </div>
               
               <div className="text-sm text-gray-500 mb-4">
-                <span>By {recipe.createdBy.name}</span>
+                <span>By {recipe.title}</span>
                 <span className="mx-2">•</span>
                 <span>
                   {isNaN(Date.parse(recipe.createdAt)) 
@@ -258,6 +270,7 @@ const RecipeListPage = () => {
         ))}
       </div>
     </div>
+    </>
   );
 };
 

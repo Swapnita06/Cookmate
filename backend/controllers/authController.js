@@ -15,16 +15,34 @@ const generateToken = (userId) => {
 };
 
 // Create email transporter
+// const transporter = nodemailer.createTransport({
+//     //service: 'gmail', // or your email service
+//     host: 'smtp.ethereal.email',
+//     //secure: true,
+//      port: 587,
+//     auth: {
+//         user: process.env.EMAIL_USERNAME,
+//         pass: process.env.EMAIL_PASSWORD
+//     },
+// //     tls: {
+// //     rejectUnauthorized: false
+// //   }
+// });
+
+
+
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // or your email service
-    secure: true,
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
     auth: {
         user: process.env.EMAIL_USERNAME,
         pass: process.env.EMAIL_PASSWORD
     },
     tls: {
-    rejectUnauthorized: false
-  }
+        rejectUnauthorized: false // for self-signed certificates if needed
+    }
 });
 
 exports.register = async (req, res) => {
@@ -46,7 +64,7 @@ exports.register = async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-// Generate verification token
+        // Generate verification token
         const verificationToken = crypto.randomBytes(20).toString('hex');
         const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
@@ -56,7 +74,7 @@ exports.register = async (req, res) => {
             email,
             password: hashedPassword,
             name,
-             isVerified: false,
+            isVerified: false,
             verificationToken,
             verificationTokenExpires,
             savedRecipes: [],
@@ -66,16 +84,12 @@ exports.register = async (req, res) => {
 
         await user.save();
 
-        // Generate token
-        //const token = generateToken(user._id);
-
-            // Send verification email
-        // const verificationUrl = `${process.env.BASE_URL}/verify-email?token=${verificationToken}`;
-      // const verificationUrl = `${process.env.FRONTEND_URL}/api/users/verify-email?token=${verificationToken}`;
-      const verificationUrl = `${process.env.BASE_URL}/api/users/verify-email?token=${verificationToken}`;
-       //const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+        // Construct verification URL
+        const verificationUrl = `${process.env.BASE_URL}/api/users/verify-email?token=${verificationToken}`;
+        
+        // Mail options
         const mailOptions = {
-            from: `"CookMate" <${process.env.EMAIL_USERNAME}>`,
+            from: "CookMate" <`${process.env.EMAIL_USERNAME}>`,
             to: email,
             subject: 'Verify Your Email for CookMate',
             html: `
@@ -87,7 +101,18 @@ exports.register = async (req, res) => {
             `
         };
 
-        await transporter.sendMail(mailOptions);
+        // Verify transporter connection first
+        try {
+            await transporter.verify();
+            console.log('Server is ready to take our messages');
+        } catch (error) {
+            console.error('Transporter verification failed:', error);
+            throw new Error('Email server connection failed');
+        }
+
+        // Send email
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Message sent: %s', info.messageId);
 
         res.status(201).json({
             message: "Registration successful! Please check your email to verify your account.",
@@ -98,7 +123,10 @@ exports.register = async (req, res) => {
 
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ message: "Registration failed. Please try again." });
+        res.status(500).json({ 
+            message: "Registration failed. Please try again.",
+            error: error.message // Include error message for debugging
+        });
     }
 };
 
