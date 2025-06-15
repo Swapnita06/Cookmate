@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AuthResponse, User } from '../component/types/auth';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api'
+  baseURL: 'https://cookmate-1-v0vt.onrender.com'
 });
 
 // Add auth token to requests
@@ -24,25 +24,25 @@ export const registerUser = async (data: {
   password: string;
   name: string;
 }): Promise<{ data: AuthResponse }> => {
-  return api.post('/users/register', data);
+  return api.post('/api/users/register', data);
 };
 
 export const loginUser = async (data: { 
   email: string; 
   password: string 
 }): Promise<{ data: AuthResponse }> => {
-  return api.post('/users/login', data);
+  return api.post('/api/users/login', data);
 };
 
 export const getUserProfile = async (): Promise<{ data: User }> => {
-  return api.get('/users/get_profile');
+  return api.get('/api/users/get_profile');
 };
 
 export const updateUserProfile = async (data: { 
   name?: string; 
   email?: string 
 }): Promise<{ data: User }> => {
-  return api.put('/users/profile', data);
+  return api.put('/api/users/profile', data);
 };
 
 // Add new verification endpoints
@@ -51,7 +51,7 @@ export const updateUserProfile = async (data: {
 // };
 
 export const verifyEmail = async (data: { token: string }) => {
-  return axios.get(`http://localhost:5000/api/users/verify-email?token=${data.token}`);
+  return axios.get(`https://cookmate-1-v0vt.onrender.com/api/users/verify-email?token=${data.token}`);
 };
 
 export const resendVerification = async (data: { userId: string }) => {

@@ -222,12 +222,18 @@ const Navbar = ({ onSearch, initialSearchQuery = "" }: NavbarProps) => {
 
           <div className="space-y-2">
             <Link
-              href="/recipes"
+              href="/homepage"
               className="block rounded-md px-3 py-2 text-base font-medium text-amber-100 hover:bg-amber-700"
             >
               All Recipes
             </Link>
 
+ <Link
+              href="/recipes/create"
+              className="block rounded-md px-3 py-2 text-base font-medium text-amber-100 hover:bg-amber-700"
+            >
+              Create Recipes
+            </Link>
             {isAuthenticated ? (
               <>
                 <Link

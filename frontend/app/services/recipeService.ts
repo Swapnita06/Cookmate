@@ -1,6 +1,6 @@
 import type { Recipe, Comment } from "../component/types/recipe"
 
-const API_BASE_URL = "http://localhost:5000/api/receipe"
+const API_BASE_URL = "https://cookmate-1-v0vt.onrender.com/api/receipe"
 
 // Helper function to safely parse dates
 const safeDateParse = (dateString: string | Date): string => {

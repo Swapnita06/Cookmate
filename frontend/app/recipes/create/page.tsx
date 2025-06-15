@@ -87,12 +87,12 @@ const CreateRecipePage = () => {
       }
 
       // Create recipe
-      const { data: recipe } = await axios.post("http://localhost:3000/api/receipe/create", formData, {
+      const { data: recipe } = await axios.post("https://cookmate-1-v0vt.onrender.com/api/receipe/create", formData, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
       // Refresh user data
-      const { data: user } = await axios.get("http://localhost:3000/api/users/profile", {
+      const { data: user } = await axios.get("https://cookmate-1-v0vt.onrender.com/api/users/profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
 

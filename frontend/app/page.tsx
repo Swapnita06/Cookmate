@@ -157,7 +157,7 @@ const scrollToContact = (e: React.MouseEvent) => {
         >
           <div className="max-w-4xl mx-auto w-full">
             {/* Hero Card */}
-            <div className="bg-orange-200 rounded-2xl p-6 md:p-12 text-center shadow-2xl relative hover:shadow-xl transition-shadow duration-300">
+            <div className="bg-orange-200  p-6 md:p-12 text-center shadow-2xl relative hover:shadow-xl opacity-85 transition-shadow duration-300">
               <p className="text-gray-600 text-base md:text-lg mb-4 md:mb-8">
                 Discover the Joy of Cooking with
                 <br />
