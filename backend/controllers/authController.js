@@ -85,9 +85,9 @@ exports.register = async (req, res) => {
         await user.save();
 
         // Construct verification URL
-        //const verificationUrl = `${process.env.BASE_URL}/api/users/verify-email?token=${verificationToken}`;
+        const verificationUrl = `https://cookmate-1-v0vt.onrender.com/api/users/verify-email?token=${verificationToken}`;
         //https://cookmate-mauve.vercel.app/
-        const verificationUrl = `https://cookmate-mauve.vercel.app/verify-email?token=${verificationToken}`;
+        //const verificationUrl = `https://cookmate-mauve.vercel.app/verify-email?token=${verificationToken}`;
         // Mail options
         const mailOptions = {
             from: "CookMate" <`${process.env.EMAIL_USERNAME}>`,
@@ -135,30 +135,38 @@ exports.register = async (req, res) => {
 exports.verifyEmail = async (req, res) => {
     try {
         const { token } = req.query;
-
-        // Debugging logs
-        console.log('Verification token received:', token);
-        
+console.log(token)
         const user = await User.findOne({
             verificationToken: token,
             verificationTokenExpires: { $gt: Date.now() }
         });
 
-        console.log('User found:', user); // Debug log
-
-        if (!user) {
-            return res.redirect('https://cookmate-mauve.vercel.app/verify-email?success=false&message=Invalid+or+expired+token');
+      if (!user) {
+            return res.redirect(`https://cookmate-mauve.vercel.app/verify-email?success=false&message=Invalid+token`);
         }
+//https://cookmate-mauve.vercel.app/
+    // if (!user) {
+    //         // Return JSON response for API calls
+    //         if (req.accepts('json')) {
+    //             return res.status(400).json({ 
+    //                 success: false,
+    //                 message: "Invalid or expired verification token" 
+    //             });
+    //         }
+    //         // Redirect for direct link clicks
+    //         return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false&message=Invalid+token`);
+    //     }
 
         user.isVerified = true;
         user.verificationToken = undefined;
         user.verificationTokenExpires = undefined;
         await user.save();
-
-        return res.redirect('https://cookmate-mauve.vercel.app/verify-email?success=true');
+  return res.redirect(`https://cookmate-mauve.vercel.app/verify-email?success=true`);
+        //res.status(200).json({ message: "Email verified successfully! You can now log in." });
     } catch (error) {
         console.error('Email verification error:', error);
-        return res.redirect('https://cookmate-mauve.vercel.app/verify-email?success=false&message=Verification+failed');
+       //res.status(500).json({ message: "Email verification failed" });
+   return res.redirect(`https://cookmate-mauve.vercel.app/verify-email?success=false`);
     }
 };
 
