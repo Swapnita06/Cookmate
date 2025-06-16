@@ -108,9 +108,15 @@ export default function AuthPage() {
       await resendVerification({ userId: unverifiedUserId })
       toast.success("Verification email resent successfully!")
       setShowVerificationNotice(false)
-    } catch (err) {
-      toast.error("Failed to resend verification email")
-    }
+    } catch (error: unknown) {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const err = error as { response?: { data?: { message?: string } } };
+    toast.error(err.response?.data?.message || "Failed to resend verification email");
+  } else {
+    toast.error("Failed to resend verification email");
+  }
+  console.error("Verification email resend error:", error);
+}
   }
 
   return (
