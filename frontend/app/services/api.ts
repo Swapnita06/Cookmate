@@ -51,7 +51,7 @@ export const updateUserProfile = async (data: {
 // };
 
 export const verifyEmail = async (data: { token: string }) => {
-  return axios.get(`https://cookmate-1-v0vt.onrender.com/api/users/verify-email?token=${data.token}`);
+  return axios.get(`https://cookmate-1-v0vt.onrender.com/verify-email?token=${data.token}`);
 };
 
 export const resendVerification = async (data: { userId: string }) => {
