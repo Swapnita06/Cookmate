@@ -87,7 +87,7 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
   }, [currentlySpeakingStepIndex, lastSpokenStepIndex])
 
   const handleNextStep = useCallback(() => {
-    let nextStepIndex = currentlySpeakingStepIndex !== null ? currentlySpeakingStepIndex + 1 : currentStepIndex + 1
+    const nextStepIndex = currentlySpeakingStepIndex !== null ? currentlySpeakingStepIndex + 1 : currentStepIndex + 1
     stopSpeaking()
 
     if (nextStepIndex < recipe.steps.length) {
@@ -98,7 +98,7 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
   }, [currentlySpeakingStepIndex, currentStepIndex, recipe.steps.length, stopSpeaking])
 
   const handlePrevStep = useCallback(() => {
-    let prevStepIndex = currentlySpeakingStepIndex !== null ? currentlySpeakingStepIndex - 1 : currentStepIndex - 1
+    const prevStepIndex = currentlySpeakingStepIndex !== null ? currentlySpeakingStepIndex - 1 : currentStepIndex - 1
     stopSpeaking()
 
     if (prevStepIndex >= 0) {

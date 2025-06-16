@@ -6,7 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
 import { toast } from "react-toastify"
-import { Plus, Minus, ChefHat, Utensils, ImageIcon, Save, X,  Sparkles, BookOpen, Timer } from "lucide-react"
+import { Plus, Minus, ChefHat, Utensils, Save, X,  Sparkles, BookOpen, Timer } from "lucide-react"
 //import Link from "next/link"
 import Navbar from "@/app/component/Navbar"
 
@@ -86,13 +86,13 @@ const CreateRecipePage = () => {
         return
       }
 
-      // Create recipe
-      const { data: _recipe } = await axios.post("https://cookmate-1-v0vt.onrender.com/api/receipe/create", formData, {
+      //Create recipe
+       await axios.post("https://cookmate-1-v0vt.onrender.com/api/receipe/create", formData, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
       // Refresh user data
-      const { data: _user } = await axios.get("https://cookmate-1-v0vt.onrender.com/api/users/profile", {
+       await axios.get("https://cookmate-1-v0vt.onrender.com/api/users/get_profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
 

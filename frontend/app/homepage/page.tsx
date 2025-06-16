@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { getAllRecipes } from "../services/recipeService"
 import type { Recipe } from "../component/types/recipe"

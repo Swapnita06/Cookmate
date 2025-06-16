@@ -108,7 +108,7 @@ export default function AuthPage() {
       await resendVerification({ userId: unverifiedUserId })
       toast.success("Verification email resent successfully!")
       setShowVerificationNotice(false)
-    } catch (error) {
+    } catch (err) {
       toast.error("Failed to resend verification email")
     }
   }
