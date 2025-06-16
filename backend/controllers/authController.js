@@ -85,8 +85,9 @@ exports.register = async (req, res) => {
         await user.save();
 
         // Construct verification URL
-        const verificationUrl = `${process.env.BASE_URL}/api/users/verify-email?token=${verificationToken}`;
-        
+        //const verificationUrl = `${process.env.BASE_URL}/api/users/verify-email?token=${verificationToken}`;
+        //https://cookmate-mauve.vercel.app/
+        const verificationUrl = `https://cookmate-mauve.vercel.app/api/users/verify-email?token=${verificationToken}`;
         // Mail options
         const mailOptions = {
             from: "CookMate" <`${process.env.EMAIL_USERNAME}>`,
