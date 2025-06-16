@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { ChefHat, Search, ChevronDown, Utensils } from "lucide-react";
+import { ChefHat, Search, ChevronDown } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 interface NavbarProps {
@@ -64,24 +65,6 @@ const Navbar = ({ onSearch, initialSearchQuery = "" }: NavbarProps) => {
             </div>
           </div>
 
-          {/* Search Bar - Desktop */}
-          {/* <div className="hidden md:block flex-1 mx-8">
-            <form onSubmit={handleSearch}>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search recipes..."
-                  className="w-full rounded-full py-2 px-4 pl-10 bg-amber-700/80 text-amber-100 placeholder-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all duration-200"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button type="submit" className="absolute left-3 top-2.5">
-                  <Search className="h-5 w-5 text-amber-300" />
-                </button>
-              </div>
-            </form>
-          </div> */}
-
           {/* Desktop Navigation */}
           <div className="hidden md:block">
             <div className="ml-4 flex items-center space-x-4">
@@ -93,13 +76,12 @@ const Navbar = ({ onSearch, initialSearchQuery = "" }: NavbarProps) => {
                   >
                     All Recipes
                   </Link>
-  <Link
+                  <Link
                     href="/recipes/create"
                     className="rounded-md px-3 py-2 text-sm font-medium text-amber-100 hover:bg-amber-700 transition-colors duration-200"
                   >
-                   Create Receipe
+                    Create Recipe
                   </Link>
-
 
                   {/* Profile dropdown */}
                   <div className="relative" ref={dropdownRef}>
@@ -109,9 +91,11 @@ const Navbar = ({ onSearch, initialSearchQuery = "" }: NavbarProps) => {
                     >
                       <div className="h-8 w-8 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 flex items-center justify-center overflow-hidden">
                         {user?.image ? (
-                          <img
+                          <Image
                             src={user.image}
                             alt="Profile"
+                            width={32}
+                            height={32}
                             className="h-full w-full object-cover"
                           />
                         ) : (
@@ -228,7 +212,7 @@ const Navbar = ({ onSearch, initialSearchQuery = "" }: NavbarProps) => {
               All Recipes
             </Link>
 
- <Link
+            <Link
               href="/recipes/create"
               className="block rounded-md px-3 py-2 text-base font-medium text-amber-100 hover:bg-amber-700"
             >

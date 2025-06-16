@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { getAllRecipes } from "../services/recipeService"
 import type { Recipe } from "../component/types/recipe"
 import { useAuth } from "../context/AuthContext"
@@ -20,14 +21,12 @@ import {
   TrendingUp,
   User,
   MessageCircle,
-  ArrowRight,
 } from "lucide-react"
 import Navbar from "../component/Navbar"
 
 export default function HomePage() {
   // Navbar state
-  const { user, isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { isAuthenticated } = useAuth()
   const [mounted, setMounted] = useState(false)
 
   // Recipe state
@@ -113,7 +112,7 @@ export default function HomePage() {
       </div>
 
       {/* Category Filters */}
-      <div className="bg-white/80 backdrop-blur-sm shadow-md  top-16 z-20">
+      <div className="bg-white/80 backdrop-blur-sm shadow-md top-16 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-hide">
             <div className="flex items-center space-x-2 text-amber-800 mr-4">
@@ -146,13 +145,6 @@ export default function HomePage() {
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-amber-900">Featured Recipes</h2>
           </div>
-          {/* <Link
-            href="/re"
-            className="text-amber-600 hover:text-amber-800 font-medium flex items-center space-x-1 group"
-          >
-            <span>View all</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-          </Link> */}
         </div>
 
         {loading ? (
@@ -181,17 +173,19 @@ export default function HomePage() {
               >
                 {/* Recipe Image */}
                 <div className="relative overflow-hidden h-56">
-                  {recipe.image ? (
-                    <img
-                      src={recipe.image || "/placeholder.svg"}
-                      alt={recipe.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-amber-300 via-orange-300 to-red-300 flex items-center justify-center">
-                      <Utensils className="w-12 h-12 text-white" />
-                    </div>
-                  )}
+                 {recipe.image ? (
+  <Image
+    src={recipe.image.startsWith('http') ? recipe.image : `/images/${recipe.image}`}
+    alt={recipe.title}
+    width={400}
+    height={300}
+    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+  />
+) : (
+  <div className="w-full h-full bg-gradient-to-br from-amber-300 via-orange-300 to-red-300 flex items-center justify-center">
+    <Utensils className="w-12 h-12 text-white" />
+  </div>
+)}
 
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -252,10 +246,12 @@ export default function HomePage() {
                         <div className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-300 to-orange-300 p-0.5">
                           <div className="w-full h-full rounded-full overflow-hidden bg-white">
                             {typeof recipe.createdBy !== "string" && recipe.createdBy.image ? (
-                              <img
+                              <Image
                                 src={recipe.createdBy.image || "/placeholder.svg"}
                                 alt={recipe.createdBy.name}
                                 className="w-full h-full object-cover"
+                                width={40}
+                                height={40}
                               />
                             ) : (
                               <div className="w-full h-full bg-gradient-to-r from-amber-200 to-orange-200 flex items-center justify-center">

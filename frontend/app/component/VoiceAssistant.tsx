@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition"
 import OpenAI from "openai"
 import {
@@ -30,9 +30,7 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [currentlySpeakingStepIndex, setCurrentlySpeakingStepIndex] = useState<number | null>(null)
   const [conversation, setConversation] = useState<string[]>([])
-  const [userQuery, setUserQuery] = useState("")
   const [isContinuousMode, setIsContinuousMode] = useState(false)
-  const [lastSpokenText, setLastSpokenText] = useState("")
   const [lastSpokenStepIndex, setLastSpokenStepIndex] = useState<number | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
   const synthRef = useRef<SpeechSynthesis | null>(null)
@@ -45,124 +43,25 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
     dangerouslyAllowBrowser: true,
   })
 
+  const stopSpeaking = useCallback(() => {
+    if (synthRef.current) {
+      synthRef.current.cancel()
+      setIsSpeaking(false)
+      setCurrentlySpeakingStepIndex(null)
+    }
+    if (listening) {
+      SpeechRecognition.stopListening()
+    }
+  }, [listening])
+
   useEffect(() => {
     synthRef.current = window.speechSynthesis
     return () => {
       stopSpeaking()
     }
-  }, [])
+  }, [stopSpeaking])
 
-  useEffect(() => {
-    if (!listening && transcript) {
-      const query = transcript.toLowerCase()
-      setUserQuery(transcript)
-
-      // Handle voice commands
-      if (query.includes("next") || query.includes("next step")) {
-        handleNextStep()
-      } else if (query.includes("previous") || query.includes("back")) {
-        handlePrevStep()
-      } else if (query.includes("repeat")) {
-        repeatCurrentStep()
-      } else if (query.includes("pause")) {
-        pauseResume()
-      } else if (query.includes("resume") || query.includes("continue")) {
-        pauseResume()
-      } else if (query.includes("stop")) {
-        stopSpeaking()
-      } else {
-        // Handle normal queries
-        handleUserQuery(transcript)
-      }
-
-      resetTranscript()
-
-      // Restart listening if in continuous mode
-      if (isContinuousMode) {
-        setTimeout(() => {
-          SpeechRecognition.startListening()
-        }, 1000)
-      }
-    }
-  }, [listening, transcript, resetTranscript])
-
-  const speak = (text: string, stepIndex?: number) => {
-    if (!synthRef.current) return
-
-    stopSpeaking() // Stop any current speech
-    setLastSpokenText(text)
-
-    // Track which step is being spoken
-    if (stepIndex !== undefined) {
-      setCurrentlySpeakingStepIndex(stepIndex)
-      setLastSpokenStepIndex(stepIndex)
-    } else {
-      setCurrentlySpeakingStepIndex(null)
-    }
-
-    const utterance = new SpeechSynthesisUtterance(text)
-    utteranceRef.current = utterance
-
-    utterance.onstart = () => setIsSpeaking(true)
-    utterance.onend = () => {
-      setIsSpeaking(false)
-      setCurrentlySpeakingStepIndex(null)
-      utteranceRef.current = null
-
-      // Restart listening if in continuous mode
-      if (isContinuousMode && !listening) {
-        setTimeout(() => {
-          SpeechRecognition.startListening()
-        }, 500)
-      }
-    }
-
-    synthRef.current.speak(utterance)
-  }
-
-  const readRecipe = () => {
-    const fullRecipe = `
-      Recipe: ${recipe.title}.
-      Description: ${recipe.description}.
-      Ingredients: ${recipe.ingredients.join(", ")}.
-      Let's begin cooking:
-      ${recipe.steps.map((step, index) => `Step ${index + 1}: ${step.instruction} (Time: ${step.time} minutes)`).join(". ")}
-    `
-    speak(fullRecipe)
-  }
-
-  const readStep = (stepIndex: number) => {
-    if (stepIndex >= 0 && stepIndex < recipe.steps.length) {
-      const step = recipe.steps[stepIndex]
-      const stepText = `Step ${stepIndex + 1}: ${step.instruction} (Time: ${step.time} minutes)`
-      speak(stepText, stepIndex)
-      setCurrentStepIndex(stepIndex)
-    } else if (stepIndex >= recipe.steps.length) {
-      const completionText = "You've completed all steps of this recipe!"
-      speak(completionText)
-    }
-  }
-
-  const readCurrentStep = () => {
-    readStep(currentStepIndex)
-  }
-
-  const repeatCurrentStep = () => {
-    // If currently speaking a step, repeat that step
-    if (currentlySpeakingStepIndex !== null) {
-      readStep(currentlySpeakingStepIndex)
-    }
-    // If not currently speaking but we know the last spoken step, repeat it
-    else if (lastSpokenStepIndex !== null) {
-      readStep(lastSpokenStepIndex)
-    }
-    // Otherwise, repeat the current step index
-    else {
-      readCurrentStep()
-    }
-  }
-
-  const pauseResume = () => {
+  const pauseResume = useCallback(() => {
     if (!synthRef.current) return
 
     if (synthRef.current.paused) {
@@ -175,27 +74,42 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
       synthRef.current.resume()
       setIsSpeaking(true)
     }
-  }
+  }, [isSpeaking])
 
-  const stopSpeaking = () => {
-    if (synthRef.current) {
-      synthRef.current.cancel()
-      setIsSpeaking(false)
-      setCurrentlySpeakingStepIndex(null)
+  const repeatCurrentStep = useCallback(() => {
+    if (currentlySpeakingStepIndex !== null) {
+      readStep(currentlySpeakingStepIndex)
+    } else if (lastSpokenStepIndex !== null) {
+      readStep(lastSpokenStepIndex)
+    } else {
+      readCurrentStep()
     }
-    if (listening) {
-      SpeechRecognition.stopListening()
-    }
-  }
+  }, [currentlySpeakingStepIndex, lastSpokenStepIndex])
 
-  const handleClose = () => {
+  const handleNextStep = useCallback(() => {
+    let nextStepIndex = currentlySpeakingStepIndex !== null ? currentlySpeakingStepIndex + 1 : currentStepIndex + 1
     stopSpeaking()
-    setIsActive(false)
-    setIsContinuousMode(false)
-  }
 
-  const handleUserQuery = async (query: string) => {
-    // Check for direct commands first
+    if (nextStepIndex < recipe.steps.length) {
+      readStep(nextStepIndex)
+    } else {
+      speak("You&apos;ve completed all steps!")
+    }
+  }, [currentlySpeakingStepIndex, currentStepIndex, recipe.steps.length, stopSpeaking])
+
+  const handlePrevStep = useCallback(() => {
+    let prevStepIndex = currentlySpeakingStepIndex !== null ? currentlySpeakingStepIndex - 1 : currentStepIndex - 1
+    stopSpeaking()
+
+    if (prevStepIndex >= 0) {
+      readStep(prevStepIndex)
+    } else {
+      speak("This is the first step.")
+      readStep(0)
+    }
+  }, [currentlySpeakingStepIndex, currentStepIndex, stopSpeaking])
+
+  const handleUserQuery = useCallback(async (query: string) => {
     const lowerQuery = query.toLowerCase()
     if (lowerQuery.includes("next") || lowerQuery.includes("next step")) {
       handleNextStep()
@@ -239,56 +153,89 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
         max_tokens: 150,
       })
 
-      const assistantResponse = response.choices[0]?.message?.content || "I didn't understand that."
+      const assistantResponse = response.choices[0]?.message?.content || "I didn&apos;t understand that."
       setConversation((prev) => [...prev, `User: ${query}`, `Assistant: ${assistantResponse}`])
       speak(assistantResponse)
     } catch (error) {
       console.error("Error calling OpenAI:", error)
       speak("Sorry, I encountered an error. Please try again.")
     }
+  }, [conversation, currentStepIndex, handleNextStep, handlePrevStep, pauseResume, recipe, repeatCurrentStep, stopSpeaking])
+
+  useEffect(() => {
+    if (!listening && transcript) {
+      handleUserQuery(transcript)
+      resetTranscript()
+
+      if (isContinuousMode) {
+        setTimeout(() => {
+          SpeechRecognition.startListening()
+        }, 1000)
+      }
+    }
+  }, [listening, transcript, resetTranscript, isContinuousMode, handleUserQuery])
+
+  const speak = (text: string, stepIndex?: number) => {
+    if (!synthRef.current) return
+
+    stopSpeaking()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utteranceRef.current = utterance
+
+    if (stepIndex !== undefined) {
+      setCurrentlySpeakingStepIndex(stepIndex)
+      setLastSpokenStepIndex(stepIndex)
+    } else {
+      setCurrentlySpeakingStepIndex(null)
+    }
+
+    utterance.onstart = () => setIsSpeaking(true)
+    utterance.onend = () => {
+      setIsSpeaking(false)
+      setCurrentlySpeakingStepIndex(null)
+      utteranceRef.current = null
+
+      if (isContinuousMode && !listening) {
+        setTimeout(() => {
+          SpeechRecognition.startListening()
+        }, 500)
+      }
+    }
+
+    synthRef.current.speak(utterance)
   }
 
-  const handleNextStep = () => {
-    // Determine the next step based on what's currently being spoken
-    let nextStepIndex: number
+  const readRecipe = () => {
+    const fullRecipe = `
+      Recipe: ${recipe.title}.
+      Description: ${recipe.description}.
+      Ingredients: ${recipe.ingredients.join(", ")}.
+      Let&apos;s begin cooking:
+      ${recipe.steps.map((step, index) => `Step ${index + 1}: ${step.instruction} (Time: ${step.time} minutes)`).join(". ")}
+    `
+    speak(fullRecipe)
+  }
 
-    if (currentlySpeakingStepIndex !== null) {
-      // If currently speaking a step, next step is the one after the currently speaking step
-      nextStepIndex = currentlySpeakingStepIndex + 1
-    } else {
-      // If not currently speaking, next step is after the current step index
-      nextStepIndex = currentStepIndex + 1
-    }
-
-    stopSpeaking() // Stop current speech immediately
-
-    if (nextStepIndex < recipe.steps.length) {
-      readStep(nextStepIndex)
-    } else {
-      speak("You've completed all steps!")
+  const readStep = (stepIndex: number) => {
+    if (stepIndex >= 0 && stepIndex < recipe.steps.length) {
+      const step = recipe.steps[stepIndex]
+      const stepText = `Step ${stepIndex + 1}: ${step.instruction} (Time: ${step.time} minutes)`
+      speak(stepText, stepIndex)
+      setCurrentStepIndex(stepIndex)
+    } else if (stepIndex >= recipe.steps.length) {
+      const completionText = "You&apos;ve completed all steps of this recipe!"
+      speak(completionText)
     }
   }
 
-  const handlePrevStep = () => {
-    // Determine the previous step based on what's currently being spoken
-    let prevStepIndex: number
+  const readCurrentStep = () => {
+    readStep(currentStepIndex)
+  }
 
-    if (currentlySpeakingStepIndex !== null) {
-      // If currently speaking a step, previous step is the one before the currently speaking step
-      prevStepIndex = currentlySpeakingStepIndex - 1
-    } else {
-      // If not currently speaking, previous step is before the current step index
-      prevStepIndex = currentStepIndex - 1
-    }
-
-    stopSpeaking() // Stop current speech immediately
-
-    if (prevStepIndex >= 0) {
-      readStep(prevStepIndex)
-    } else {
-      speak("This is the first step.")
-      readStep(0) // Read the first step
-    }
+  const handleClose = () => {
+    stopSpeaking()
+    setIsActive(false)
+    setIsContinuousMode(false)
   }
 
   const toggleContinuousMode = () => {
@@ -298,17 +245,15 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
   if (!browserSupportsSpeechRecognition) {
     return (
       <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
-        Browser doesn't support speech recognition.
+        Browser doesn&apos;t support speech recognition.
       </div>
     )
   }
 
   return (
     <>
-      {/* Prominent Voice Assistant Section */}
       <div className="mb-12">
         <div className="bg-gradient-to-br from-amber-100 via-orange-100 to-red-100 rounded-3xl p-8 shadow-2xl border-2 border-amber-200 relative overflow-hidden">
-          {/* Animated Background Elements */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-amber-300 to-orange-300 rounded-full opacity-20 animate-pulse"></div>
             <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-orange-300 to-red-300 rounded-full opacity-20 animate-pulse delay-1000"></div>
@@ -318,7 +263,6 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
             ></div>
           </div>
 
-          {/* Header */}
           <div className="relative z-10 text-center mb-8">
             <div className="flex items-center justify-center mb-4">
               <div className="bg-gradient-to-r from-amber-500 to-orange-500 w-16 h-16 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-all duration-300">
@@ -333,7 +277,6 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
           </div>
 
           {!isActive ? (
-            /* Activation State */
             <div className="relative z-10 text-center">
               <div className="mb-8">
                 <button
@@ -358,7 +301,7 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
                 <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 transform hover:scale-105 transition-all duration-300 shadow-lg">
                   <Volume2 className="w-8 h-8 text-amber-600 mx-auto mb-3" />
                   <h3 className="font-bold text-amber-900 mb-2">Voice Commands</h3>
-                  <p className="text-amber-700 text-sm">Say "next", "previous", "repeat", or ask questions</p>
+                  <p className="text-amber-700 text-sm">Say &quot;next&quot;, &quot;previous&quot;, &quot;repeat&quot;, or ask questions</p>
                 </div>
                 <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 transform hover:scale-105 transition-all duration-300 shadow-lg">
                   <MessageCircle className="w-8 h-8 text-orange-600 mx-auto mb-3" />
@@ -373,11 +316,9 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
               </div>
             </div>
           ) : (
-            /* Active State */
             <div className="relative z-10">
               {!isMinimized ? (
                 <div className="space-y-6">
-                  {/* Status Display */}
                   <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3">
@@ -427,7 +368,6 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
                       )}
                     </div>
 
-                    {/* Current Step Display */}
                     <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 mb-4">
                       <div className="text-amber-900 font-medium text-lg leading-relaxed">
                         {recipe.steps[currentStepIndex]?.instruction}
@@ -438,7 +378,6 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
                     </div>
                   </div>
 
-                  {/* Control Buttons */}
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     <button
                       onClick={handlePrevStep}
@@ -481,7 +420,6 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
                     </button>
                   </div>
 
-                  {/* Voice Input */}
                   <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
                     <div className="flex items-center space-x-4 mb-4">
                       <button
@@ -498,7 +436,7 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
                         <div className="text-lg font-semibold text-amber-900">
                           {listening ? "Listening for your command..." : "Tap to ask a question"}
                         </div>
-                        {transcript && <div className="text-amber-700 text-sm mt-1">You said: "{transcript}"</div>}
+                        {transcript && <div className="text-amber-700 text-sm mt-1">You said: &quot;{transcript}&quot;</div>}
                       </div>
                     </div>
 
@@ -514,7 +452,6 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
                     </button>
                   </div>
 
-                  {/* Conversation History */}
                   {conversation.length > 0 && (
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
                       <h3 className="font-bold text-amber-900 mb-4 flex items-center">
@@ -539,7 +476,6 @@ const VoiceAssistant = ({ recipe }: VoiceAssistantProps) => {
                   )}
                 </div>
               ) : (
-                /* Minimized State */
                 <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">

@@ -3,6 +3,7 @@ import { Button } from "./component/ui/button"
 import { Heart, Eye, Facebook, Instagram, Twitter, TwitterIcon as TikTok, Menu, ChefHat, Star, Sparkles, Users, Clock } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
+import Image from "next/image"
 
 export default function CookMateLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -13,7 +14,7 @@ export default function CookMateLanding() {
     footer: false
   })
 
-const aboutRef = useRef<HTMLElement>(null);
+  const aboutRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -50,27 +51,27 @@ const aboutRef = useRef<HTMLElement>(null);
     handleScroll(); // Check on initial render
     
     return () => window.removeEventListener('scroll', handleScroll);
-}, []);
+  }, []);
 
-const scrollToAbout = (e: React.MouseEvent) => {
-     e.preventDefault();
-  aboutRef.current?.scrollIntoView({ behavior: 'smooth' });
-}
-
-
-const scrollToContact = (e: React.MouseEvent) => {
-  e.preventDefault();
-   if (typeof window === 'undefined') return;
-  const contactElement = document.getElementById('footer');
-  const headerHeight = document.querySelector('header')?.offsetHeight || 0;
-  
-  if (contactElement) {
-    window.scrollTo({
-      top: contactElement.offsetTop - headerHeight - 20, // 20px extra spacing
-      behavior: 'smooth'
-    });
+  const scrollToAbout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    aboutRef.current?.scrollIntoView({ behavior: 'smooth' });
   }
-}
+
+  const scrollToContact = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (typeof window === 'undefined') return;
+    const contactElement = document.getElementById('footer');
+    const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+    
+    if (contactElement) {
+      window.scrollTo({
+        top: contactElement.offsetTop - headerHeight - 20, // 20px extra spacing
+        behavior: 'smooth'
+      });
+    }
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Background Image */}
@@ -79,6 +80,7 @@ const scrollToContact = (e: React.MouseEvent) => {
         style={{ backgroundImage: 'url("/images/ChatGPT Image Jun 10, 2025, 12_17_51 PM.png")' }}
       ></div>
       <div className="absolute inset-0 z-0 bg-black/30"></div> {/* Overlay to ensure text readability */}
+      
       {/* Header */}
       <header className="bg-orange-100 px-6 py-4 relative z-20">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -96,58 +98,54 @@ const scrollToContact = (e: React.MouseEvent) => {
 
           {/* Desktop navigation */}
           <nav className="hidden md:flex space-x-8">
-          <a href="#" className="text-gray-700 hover:text-gray-900 font-medium">
-  Home
-</a>
-<a 
-  //href="#about" 
-  className="text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 cursor-pointer"
-  onClick={scrollToAbout}
->
-  About
-</a>
- <a 
-    className="text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 cursor-pointer"
-    onClick={scrollToContact}
-  >
-    Contact Us
-  </a>
-
-<Link 
-  href="/auth" 
-  className="text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 cursor-pointer"
->
-  Get Started
-</Link>
+            <a href="#" className="text-gray-700 hover:text-gray-900 font-medium">
+              Home
+            </a>
+            <a 
+              className="text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 cursor-pointer"
+              onClick={scrollToAbout}
+            >
+              About
+            </a>
+            <a 
+              className="text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 cursor-pointer"
+              onClick={scrollToContact}
+            >
+              Contact Us
+            </a>
+            <Link 
+              href="/auth" 
+              className="text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 cursor-pointer"
+            >
+              Get Started
+            </Link>
           </nav>
         </div>
 
         {/* Mobile navigation */}
         {mobileMenuOpen && (
-  <div className="md:hidden bg-amber-50 mt-2 py-4 px-6 rounded-lg shadow-lg absolute left-0 right-0">
-    <nav className="flex flex-col space-y-4">
-      <a href="#" className="text-gray-700 hover:text-gray-900 font-medium cursor-pointer">
-        Home
-      </a>
-      {/* <a href="#" className="text-gray-700 hover:text-gray-900 font-medium cursor-pointer">
-        Welcome
-      </a> */}
-      <a 
-        className="text-gray-700 hover:text-gray-900 font-medium cursor-pointer"
-        onClick={scrollToAbout}
-      >
-        About
-      </a>
-       <a 
-    className="text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 cursor-pointer"
-    onClick={scrollToContact}
-  >
-    Contact Us
-  </a>
-    </nav>
-  </div>
-)}
+          <div className="md:hidden bg-amber-50 mt-2 py-4 px-6 rounded-lg shadow-lg absolute left-0 right-0">
+            <nav className="flex flex-col space-y-4">
+              <a href="#" className="text-gray-700 hover:text-gray-900 font-medium cursor-pointer">
+                Home
+              </a>
+              <a 
+                className="text-gray-700 hover:text-gray-900 font-medium cursor-pointer"
+                onClick={scrollToAbout}
+              >
+                About
+              </a>
+              <a 
+                className="text-gray-700 hover:text-gray-900 font-medium transition-colors duration-300 cursor-pointer"
+                onClick={scrollToContact}
+              >
+                Contact Us
+              </a>
+            </nav>
+          </div>
+        )}
       </header>
+
       {/* Main Content */}
       <main className="relative">
         {/* Hero Section */}
@@ -157,7 +155,7 @@ const scrollToContact = (e: React.MouseEvent) => {
         >
           <div className="max-w-4xl mx-auto w-full">
             {/* Hero Card */}
-            <div className="bg-orange-200  p-6 md:p-12 text-center shadow-2xl relative hover:shadow-xl opacity-85 transition-shadow duration-300">
+            <div className="bg-orange-200 p-6 md:p-12 text-center shadow-2xl relative hover:shadow-xl opacity-85 transition-shadow duration-300">
               <p className="text-gray-600 text-base md:text-lg mb-4 md:mb-8">
                 Discover the Joy of Cooking with
                 <br />
@@ -206,9 +204,11 @@ const scrollToContact = (e: React.MouseEvent) => {
               {/* Post 1 */}
               <div className="bg-orange-100 overflow-hidden border border-black hover:shadow-lg transition-shadow duration-300">
                 <div className="h-64 overflow-hidden">
-                  <img
+                  <Image
                     src="/images/Verrine citron-menthe et spéculoos _ une recette dessert facile et fraîche.jpeg"
                     alt="Yellow cups and an open book"
+                    width={400}
+                    height={300}
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     style={{ objectPosition: "5% 28%" }}
                   />
@@ -236,9 +236,11 @@ const scrollToContact = (e: React.MouseEvent) => {
               {/* Post 2 */}
               <div className="bg-orange-100 overflow-hidden border border-black hover:shadow-lg transition-shadow duration-300">
                 <div className="h-64 overflow-hidden">
-                  <img
+                  <Image
                     src="/images/download (1).jpeg"
                     alt="Kitchen utensils hanging on a rack"
+                    width={400}
+                    height={300}
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     style={{ objectPosition: "50% 0" }}
                   />
@@ -246,7 +248,7 @@ const scrollToContact = (e: React.MouseEvent) => {
                 <div className="p-6">
                   <p className="text-sm text-gray-500 mb-2">Swapnita Singh</p>
                   <h3 className="text-2xl font-semibold text-gray-800 mb-3">
-                    Stay Organized in the Kitchen with COOKMATE's Tools
+                    Stay Organized in the Kitchen with COOKMATE&apos;s Tools
                   </h3>
                   <p className="text-gray-600 mb-4">
                     In a bustling kitchen, where pots simmer, pans sizzle, and flavors dance, staying organized is the secret ingredient to a seamless...
@@ -266,9 +268,11 @@ const scrollToContact = (e: React.MouseEvent) => {
               {/* Post 3 */}
               <div className="bg-orange-100 overflow-hidden border border-black hover:shadow-lg transition-shadow duration-300">
                 <div className="h-64 overflow-hidden">
-                  <img
+                  <Image
                     src="/images/Sweet and Spicy Chicken Wings.jpeg"
                     alt="Yellow cups and an open book"
+                    width={400}
+                    height={300}
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     style={{ objectPosition: "100% 0" }}
                   />
@@ -302,9 +306,11 @@ const scrollToContact = (e: React.MouseEvent) => {
           ref={aboutRef}
           className={`relative h-[380px] md:h-[800px] overflow-hidden transition-all duration-1000 delay-300 ${isVisible.about ? 'opacity-100' : 'opacity-0'}`}
         >
-          <img
+          <Image
             src="/images/ChatGPT Image Jun 10, 2025, 03_05_31 PM.png"
             alt="Yellow cups and an open book"
+            width={1200}
+            height={800}
             className="w-full h-full object-cover"
             style={{ objectPosition: "100% 0" }}
           />
@@ -331,140 +337,136 @@ const scrollToContact = (e: React.MouseEvent) => {
           </div>
         </section>
 
-
-
-
- {/* Enhanced Features Section */}
-      <div className="relative bg-gradient-to-br from-amber-100 via-orange-50 to-amber-200 py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-32 h-32 bg-amber-400 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-40 h-40 bg-orange-400 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="relative max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 mb-6 shadow-lg">
-              <Sparkles className="w-5 h-5 text-amber-600 animate-pulse" />
-              <span className="text-amber-800 font-semibold">Why Choose CookMate?</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-800 to-orange-800 bg-clip-text text-transparent mb-6">
-              Your Culinary Journey Starts Here
-            </h2>
-            <p className="text-xl text-amber-700 max-w-3xl mx-auto leading-relaxed">
-              Experience the perfect blend of technology and tradition with features designed to elevate your cooking
-              experience
-            </p>
+        {/* Enhanced Features Section */}
+        <div className="relative bg-gradient-to-br from-amber-100 via-orange-50 to-amber-200 py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-20 left-20 w-32 h-32 bg-amber-400 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-20 right-20 w-40 h-40 bg-orange-400 rounded-full blur-3xl"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {/* Voice Assistant Feature */}
-            <div className="group text-center transform hover:scale-105 transition-all duration-500">
-              <div className="relative mb-8">
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl blur-xl opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
-                <div className="relative bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl w-20 h-20 flex items-center justify-center mx-auto shadow-2xl group-hover:shadow-3xl transition-all duration-500 group-hover:rotate-6">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-300"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
-                    />
-                  </svg>
-                </div>
+          <div className="relative max-w-7xl mx-auto">
+            <div className="text-center mb-20">
+              <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-6 py-3 mb-6 shadow-lg">
+                <Sparkles className="w-5 h-5 text-amber-600 animate-pulse" />
+                <span className="text-amber-800 font-semibold">Why Choose CookMate?</span>
               </div>
-              <h3 className="text-2xl font-bold text-amber-900 mb-4 group-hover:text-orange-800 transition-colors duration-300">
-                Voice Assistant
-              </h3>
-              <p className="text-amber-800 leading-relaxed text-lg">
-                Get step-by-step cooking instructions hands-free with our intelligent voice assistant. Perfect for messy
-                hands!
+              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-amber-800 to-orange-800 bg-clip-text text-transparent mb-6">
+                Your Culinary Journey Starts Here
+              </h2>
+              <p className="text-xl text-amber-700 max-w-3xl mx-auto leading-relaxed">
+                Experience the perfect blend of technology and tradition with features designed to elevate your cooking
+                experience
               </p>
             </div>
 
-            {/* Save Money Feature */}
-            <div className="group text-center transform hover:scale-105 transition-all duration-500">
-              <div className="relative mb-8">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-500 rounded-3xl blur-xl opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
-                <div className="relative bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl w-20 h-20 flex items-center justify-center mx-auto shadow-2xl group-hover:shadow-3xl transition-all duration-500 group-hover:rotate-6">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-300"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              {/* Voice Assistant Feature */}
+              <div className="group text-center transform hover:scale-105 transition-all duration-500">
+                <div className="relative mb-8">
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl blur-xl opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
+                  <div className="relative bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl w-20 h-20 flex items-center justify-center mx-auto shadow-2xl group-hover:shadow-3xl transition-all duration-500 group-hover:rotate-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-300"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
+                      />
+                    </svg>
+                  </div>
                 </div>
+                <h3 className="text-2xl font-bold text-amber-900 mb-4 group-hover:text-orange-800 transition-colors duration-300">
+                  Voice Assistant
+                </h3>
+                <p className="text-amber-800 leading-relaxed text-lg">
+                  Get step-by-step cooking instructions hands-free with our intelligent voice assistant. Perfect for messy
+                  hands!
+                </p>
               </div>
-              <h3 className="text-2xl font-bold text-amber-900 mb-4 group-hover:text-green-800 transition-colors duration-300">
-                Smart Savings
-              </h3>
-              <p className="text-amber-800 leading-relaxed text-lg">
-                Discover recipes based on what's in your pantry to reduce food waste and save money on groceries.
-              </p>
+
+              {/* Save Money Feature */}
+              <div className="group text-center transform hover:scale-105 transition-all duration-500">
+                <div className="relative mb-8">
+                  <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-500 rounded-3xl blur-xl opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
+                  <div className="relative bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl w-20 h-20 flex items-center justify-center mx-auto shadow-2xl group-hover:shadow-3xl transition-all duration-500 group-hover:rotate-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-300"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <h3 className="text-2xl font-bold text-amber-900 mb-4 group-hover:text-green-800 transition-colors duration-300">
+                  Smart Savings
+                </h3>
+                <p className="text-amber-800 leading-relaxed text-lg">
+                  Discover recipes based on what&apos;s in your pantry to reduce food waste and save money on groceries.
+                </p>
+              </div>
+
+              {/* Community Feature */}
+              <div className="group text-center transform hover:scale-105 transition-all duration-500">
+                <div className="relative mb-8">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-500 rounded-3xl blur-xl opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
+                  <div className="relative bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl w-20 h-20 flex items-center justify-center mx-auto shadow-2xl group-hover:shadow-3xl transition-all duration-500 group-hover:rotate-6">
+                    <Users className="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-300" />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-bold text-amber-900 mb-4 group-hover:text-purple-800 transition-colors duration-300">
+                  Vibrant Community
+                </h3>
+                <p className="text-amber-800 leading-relaxed text-lg">
+                  Join a passionate community of food lovers sharing their favorite recipes, tips, and culinary
+                  adventures.
+                </p>
+              </div>
             </div>
 
-            {/* Community Feature */}
-            <div className="group text-center transform hover:scale-105 transition-all duration-500">
-              <div className="relative mb-8">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-500 rounded-3xl blur-xl opacity-25 group-hover:opacity-40 transition-opacity duration-500"></div>
-                <div className="relative bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl w-20 h-20 flex items-center justify-center mx-auto shadow-2xl group-hover:shadow-3xl transition-all duration-500 group-hover:rotate-6">
-                  <Users className="h-10 w-10 text-white group-hover:scale-110 transition-transform duration-300" />
+            {/* Mini Features Grid */}
+            <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center group">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <Clock className="w-8 h-8 text-amber-600 mx-auto mb-3 group-hover:rotate-12 transition-transform duration-300" />
+                  <div className="text-sm font-semibold text-amber-800">Quick Recipes</div>
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-amber-900 mb-4 group-hover:text-purple-800 transition-colors duration-300">
-                Vibrant Community
-              </h3>
-              <p className="text-amber-800 leading-relaxed text-lg">
-                Join a passionate community of food lovers sharing their favorite recipes, tips, and culinary
-                adventures.
-              </p>
-            </div>
-          </div>
-
-          {/* Mini Features Grid */}
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center group">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                <Clock className="w-8 h-8 text-amber-600 mx-auto mb-3 group-hover:rotate-12 transition-transform duration-300" />
-                <div className="text-sm font-semibold text-amber-800">Quick Recipes</div>
+              <div className="text-center group">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <Star className="w-8 h-8 text-amber-600 mx-auto mb-3 group-hover:rotate-12 transition-transform duration-300" />
+                  <div className="text-sm font-semibold text-amber-800">Top Rated</div>
+                </div>
               </div>
-            </div>
-            <div className="text-center group">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                <Star className="w-8 h-8 text-amber-600 mx-auto mb-3 group-hover:rotate-12 transition-transform duration-300" />
-                <div className="text-sm font-semibold text-amber-800">Top Rated</div>
+              <div className="text-center group">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <Heart className="w-8 h-8 text-amber-600 mx-auto mb-3 group-hover:rotate-12 transition-transform duration-300" />
+                  <div className="text-sm font-semibold text-amber-800">Favorites</div>
+                </div>
               </div>
-            </div>
-            <div className="text-center group">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                <Heart className="w-8 h-8 text-amber-600 mx-auto mb-3 group-hover:rotate-12 transition-transform duration-300" />
-                <div className="text-sm font-semibold text-amber-800">Favorites</div>
-              </div>
-            </div>
-            <div className="text-center group">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                <ChefHat className="w-8 h-8 text-amber-600 mx-auto mb-3 group-hover:rotate-12 transition-transform duration-300" />
-                <div className="text-sm font-semibold text-amber-800">Chef's Choice</div>
+              <div className="text-center group">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <ChefHat className="w-8 h-8 text-amber-600 mx-auto mb-3 group-hover:rotate-12 transition-transform duration-300" />
+                  <div className="text-sm font-semibold text-amber-800">Chef&apos;s Choice</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-
 
         {/* Footer */}
         <footer 

@@ -23,6 +23,7 @@ import type { Recipe } from "../../component/types/recipe"
 import { useAuth } from "../../context/AuthContext"
 import VoiceAssistant from "../../component/VoiceAssistant"
 import Navbar from "@/app/component/Navbar"
+import Image from "next/image"
 
 const RecipeDetailPage = () => {
   const [recipe, setRecipe] = useState<Recipe | null>(null)
@@ -195,11 +196,14 @@ const RecipeDetailPage = () => {
               {/* Image Section */}
               {recipe.image && (
                 <div className="lg:w-1/2 relative overflow-hidden">
-                  <img
-                    src={recipe.image || "/placeholder.svg"}
-                    alt={recipe.title}
-                    className="w-full h-64 lg:h-96 object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                 <Image
+  src={recipe.image || "/placeholder.svg"}
+  alt={recipe.title}
+  width={800}
+  height={600}
+  className="w-full h-64 lg:h-96 object-cover transition-transform duration-700 group-hover:scale-110"
+  priority // Optional: for above-the-fold images
+/>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
                   {/* Floating Action Buttons */}
@@ -310,11 +314,13 @@ const RecipeDetailPage = () => {
                       <div className="w-16 h-16 rounded-full bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 p-1">
                         <div className="w-full h-full rounded-full overflow-hidden bg-white">
                           {typeof recipe.createdBy !== "string" && recipe.createdBy.image ? (
-                            <img
-                              src={recipe.createdBy.image || "/placeholder.svg"}
-                              alt={typeof recipe.createdBy === "string" ? "User" : recipe.createdBy.name}
-                              className="w-full h-full object-cover"
-                            />
+                           <Image
+  src={recipe.createdBy.image || "/placeholder.svg"}
+  alt={typeof recipe.createdBy === "string" ? "User" : recipe.createdBy.name}
+  width={64}
+  height={64}
+  className="w-full h-full object-cover"
+/>
                           ) : (
                             <div className="w-full h-full bg-gradient-to-r from-amber-200 to-orange-200 flex items-center justify-center">
                               <User className="w-8 h-8 text-amber-600" />
@@ -422,11 +428,13 @@ const RecipeDetailPage = () => {
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-300 to-orange-300 p-0.5 flex-shrink-0">
                       <div className="w-full h-full rounded-full overflow-hidden bg-white">
                         {user?.image ? (
-                          <img
-                            src={user.image || "/placeholder.svg"}
-                            alt={user.name}
-                            className="w-full h-full object-cover"
-                          />
+                        <Image
+  src={user.image || "/placeholder.svg"}
+  alt={user.name}
+  width={40}
+  height={40}
+  className="w-full h-full object-cover"
+/>
                         ) : (
                           <div className="w-full h-full bg-gradient-to-r from-amber-200 to-orange-200 flex items-center justify-center">
                             <User className="w-5 h-5 text-amber-600" />
@@ -484,11 +492,13 @@ const RecipeDetailPage = () => {
                               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-300 to-orange-300 p-0.5">
                                 <div className="w-full h-full rounded-full overflow-hidden bg-white">
                                   {typeof comment.user !== "string" && comment.user.image ? (
-                                    <img
-                                      src={comment.user.image || "/placeholder.svg"}
-                                      alt={typeof comment.user === "string" ? "User" : comment.user.name}
-                                      className="w-full h-full object-cover"
-                                    />
+                                    <Image
+  src={comment.user.image || "/placeholder.svg"}
+  alt={typeof comment.user === "string" ? "User" : comment.user.name}
+  width={40}
+  height={40}
+  className="w-full h-full object-cover"
+/>
                                   ) : (
                                     <div className="w-full h-full bg-gradient-to-r from-amber-200 to-orange-200 flex items-center justify-center">
                                       <User className="w-5 h-5 text-amber-600" />

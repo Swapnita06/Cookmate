@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { User } from "../component/types/auth";
 import { getUserProfile } from "../services/api";
 import { useRouter } from "next/navigation";
@@ -20,48 +20,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
- const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   
- useEffect(() => {
+  useEffect(() => {
     const storedToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     setToken(storedToken);
   }, []);
 
-  // Check if token exists in localStorage
-  //const isAuthenticated = typeof window !== 'undefined' && Boolean(localStorage.getItem('token'));
-const isAuthenticated = Boolean(token);
-  const fetchUser = async () => {
+  const isAuthenticated = Boolean(token);
+
+  const fetchUser = useCallback(async () => {
     try {
-      // Only fetch user if token exists
       if (isAuthenticated) {
         const { data } = await getUserProfile();
         setUser(data);
       } else {
         setUser(null);
       }
-    } catch (error) {
+    } catch (err) {
+      console.error("Failed to fetch user profile:", err);
       setUser(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAuthenticated]);
 
-  // useEffect(() => {
-  //   fetchUser();
-  // }, [isAuthenticated]); // Re-run when authentication status changes
-
- useEffect(() => {
+  useEffect(() => {
     fetchUser();
-  }, [token]);
-
+  }, [token, fetchUser]);
 
   const login = (token: string) => {
     localStorage.setItem('token', token);
-    fetchUser(); // Fetch user profile after login
+    setToken(token);
+    fetchUser();
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    setToken(null);
     setUser(null);
     router.push('/');
   };

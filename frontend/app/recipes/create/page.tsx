@@ -6,8 +6,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
 import { toast } from "react-toastify"
-import { Plus, Minus, ChefHat, Utensils, ImageIcon, Save, X, ArrowLeft, Sparkles, BookOpen, Timer } from "lucide-react"
-import Link from "next/link"
+import { Plus, Minus, ChefHat, Utensils, ImageIcon, Save, X,  Sparkles, BookOpen, Timer } from "lucide-react"
+//import Link from "next/link"
 import Navbar from "@/app/component/Navbar"
 
 const CreateRecipePage = () => {
@@ -50,7 +50,7 @@ const CreateRecipePage = () => {
   const handleStepChange = (index: number, field: string, value: string | number) => {
     const newSteps = [...formData.steps]
     const parsedValue = field === "time" ? (typeof value === "string" ? Number.parseInt(value) || 0 : value) : value
-    newSteps[index] = { ...newSteps[index], [field]: value }
+    newSteps[index] = { ...newSteps[index], [field]: parsedValue }
     setFormData((prev) => ({ ...prev, steps: newSteps }))
   }
 
@@ -87,12 +87,12 @@ const CreateRecipePage = () => {
       }
 
       // Create recipe
-      const { data: recipe } = await axios.post("https://cookmate-1-v0vt.onrender.com/api/receipe/create", formData, {
+      const { data: _recipe } = await axios.post("https://cookmate-1-v0vt.onrender.com/api/receipe/create", formData, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
       // Refresh user data
-      const { data: user } = await axios.get("https://cookmate-1-v0vt.onrender.com/api/users/profile", {
+      const { data: _user } = await axios.get("https://cookmate-1-v0vt.onrender.com/api/users/profile", {
         headers: { Authorization: `Bearer ${token}` },
       })
 
@@ -194,7 +194,7 @@ const CreateRecipePage = () => {
               </div>
 
               <div className="lg:col-span-2">
-                <label htmlFor="image" className="block text-sm font-medium text-amber-900 mb-2">
+                {/* <label htmlFor="image" className="block text-sm font-medium text-amber-900 mb-2">
                   Image URL (optional)
                 </label>
                 <div className="relative">
@@ -208,7 +208,7 @@ const CreateRecipePage = () => {
                     className="w-full border border-amber-200 rounded-xl shadow-sm py-3 px-4 pl-12 bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 transition-all duration-300 text-amber-900 placeholder-amber-500"
                   />
                   <ImageIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-amber-500" />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
