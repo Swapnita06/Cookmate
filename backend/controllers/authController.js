@@ -136,37 +136,29 @@ exports.verifyEmail = async (req, res) => {
     try {
         const { token } = req.query;
 
+        // Debugging logs
+        console.log('Verification token received:', token);
+        
         const user = await User.findOne({
             verificationToken: token,
             verificationTokenExpires: { $gt: Date.now() }
         });
 
-      if (!user) {
-            return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false&message=Invalid+token`);
-        }
+        console.log('User found:', user); // Debug log
 
-    // if (!user) {
-    //         // Return JSON response for API calls
-    //         if (req.accepts('json')) {
-    //             return res.status(400).json({ 
-    //                 success: false,
-    //                 message: "Invalid or expired verification token" 
-    //             });
-    //         }
-    //         // Redirect for direct link clicks
-    //         return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false&message=Invalid+token`);
-    //     }
+        if (!user) {
+            return res.redirect('https://cookmate-mauve.vercel.app/verify-email?success=false&message=Invalid+or+expired+token');
+        }
 
         user.isVerified = true;
         user.verificationToken = undefined;
         user.verificationTokenExpires = undefined;
         await user.save();
-  return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=true`);
-        //res.status(200).json({ message: "Email verified successfully! You can now log in." });
+
+        return res.redirect('https://cookmate-mauve.vercel.app/verify-email?success=true');
     } catch (error) {
         console.error('Email verification error:', error);
-       //res.status(500).json({ message: "Email verification failed" });
-   return res.redirect(`${process.env.FRONTEND_URL}/verify-email?success=false`);
+        return res.redirect('https://cookmate-mauve.vercel.app/verify-email?success=false&message=Verification+failed');
     }
 };
 
